@@ -6,46 +6,46 @@
 #include <vector>
 #include <iostream>
 
+#include "Window.h"
+
 class Instance
 {
 public:
-	Instance();
+	static void Create();
+	static void Destroy();
 
-	void Create(GLFWwindow* window);
-	void Destory();
+	static inline VkInstance GetInstance() { return instance; }
+	static inline VkSurfaceKHR GetSurface() { return surface; }
+	static inline VkAllocationCallbacks* GetAllocator() { return allocator; }
 
-	VkInstance GetInstance();
-	VkSurfaceKHR GetSurface();
-	VkAllocationCallbacks* GetAllocator();
+	static inline bool IsDirty() { return dirty; }
+	static inline bool IsValidationLayersEnabled() { return enableValidationLayers; }
 
-	bool IsDirty();
-	bool IsValidationLayersEnabled();
-
-	std::vector<const char*> GetValidationLayers();
+	static inline std::vector<const char*>& GetValidationLayers() { return activeValidationLayersNames; }
 
 private:
 
-	std::vector<const char*> getRequiredExtensions();
-	void setupDebugMessenger();
-	void createSurface(GLFWwindow* window);
+	static inline std::vector<const char*> getRequiredExtensions();
+	static inline void setupDebugMessenger();
+	static inline void createSurface();
 
-	VkInstance instance;
-	VkSurfaceKHR surface;
-	VkAllocationCallbacks* allocator;
-	VkDebugUtilsMessengerEXT debugMessenger;
+	static inline VkInstance instance = VK_NULL_HANDLE;
+	static inline VkSurfaceKHR surface = VK_NULL_HANDLE;
+	static inline VkAllocationCallbacks* allocator = VK_NULL_HANDLE;
+	static inline VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
 
-	std::string applicationName;
-	std::string engineName;
+	static inline std::string applicationName = "App";
+	static inline std::string engineName = "Vulkan Engine";
 
-	uint32_t apiVersion;
-	std::vector<bool> activeValidationLayers;
-	std::vector<const char*> activeValidationLayersNames;
-	std::vector<VkLayerProperties> validationLayers;
-	std::vector<bool> activeExtensions;
-	std::vector<const char*> activeExtensionsNames;
-	std::vector<VkExtensionProperties> extensions;
+	static inline uint32_t apiVersion;
+	static inline std::vector<bool> activeValidationLayers;
+	static inline std::vector<const char*> activeValidationLayersNames;
+	static inline std::vector<VkLayerProperties> validationLayers;
+	static inline std::vector<bool> activeExtensions;
+	static inline std::vector<const char*> activeExtensionsNames;
+	static inline std::vector<VkExtensionProperties> extensions;
 
-	bool enableValidationLayers;
-	bool dirty;
+	static inline bool enableValidationLayers = true;
+	static inline bool dirty = true;
 };
 

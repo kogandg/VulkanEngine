@@ -1,32 +1,5 @@
 #include "Window.h"
 
-Window::Window()
-{
-	window = nullptr;
-	monitors = nullptr;
-	name = "Window";
-	width = 800;
-	height = 600;
-	posX = 100;
-	posY = 100;
-	monitorIndex = 0;
-	monitorCount = 0;
-	framebufferResized = 0;
-
-	deltaTime = 0.0f;
-
-	scroll = 0.0f;
-	deltaScroll = 0.0f;
-	mousePos = glm::vec2(0.0f);
-	deltaMousePos = glm::vec2(0.0f);
-
-	mode = Mode::Windowed;
-	dirty = true;
-	resizable = true;
-	decorated = true;
-	maximized = false;
-}
-
 void Window::Create()
 {
 	glfwInit();
@@ -66,8 +39,6 @@ void Window::Create()
 		window = glfwCreateWindow(width, height, name, monitor, nullptr);
 		break;
 	}
-	
-	glfwSetWindowUserPointer(window, reinterpret_cast<void*>(this));
 
 	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	glfwSetScrollCallback(window, scrollCallback);
@@ -107,86 +78,20 @@ void Window::UpdateFramebufferSize()
 	glfwGetFramebufferSize(window, &width, &height);
 }
 
-GLFWwindow* Window::GetGLFWwindow()
-{
-	return window;
-}
-
-bool Window::IsDirty()
-{
-	return dirty;
-}
-
-void Window::WaitEvents()
-{
-	glfwWaitEvents();
-}
-
-uint32_t Window::GetWidth()
-{
-	return width;
-}
-
-uint32_t Window::GetHeight()
-{
-	return height;
-}
-
-float Window::GetDeltaTime()
-{
-	return deltaTime;
-}
-
-bool Window::GetShouldClose()
-{
-	return glfwWindowShouldClose(window);
-}
-
-float Window::GetDeltaScroll()
-{
-	return deltaScroll;
-}
-
-glm::vec2 Window::GetDeltaMouse()
-{
-	return deltaMousePos;
-}
-
-bool Window::GetFramebufferResized()
-{
-	return framebufferResized;
-}
-
-bool Window::IsKeyDown(uint16_t keyCode)
-{
-	return glfwGetKey(window, keyCode);
-}
-
-bool Window::IsMouseDown(uint16_t buttonCode)
-{
-	return glfwGetMouseButton(window, buttonCode);
-}
-
 void Window::scrollCallback(GLFWwindow* window, double x, double y)
 {
-	auto thisWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-
-	thisWindow->scroll += y;
-	thisWindow->deltaScroll += y;
+	Window::scroll += y;
+	Window::deltaScroll += y;
 }
 
 void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-	auto thisWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-	
-	thisWindow->width = width;
-	thisWindow->height = height;
-	thisWindow->framebufferResized = true;
+	Window::width = width;
+	Window::height = height;
+	Window::framebufferResized = true;
 }
 
-void Window::windowMaximizeCallback(GLFWwindow* window, int maximized)
+void Window::windowMaximizeCallback(GLFWwindow* window, int maximize)
 {
-	auto thisWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-
-	thisWindow->maximized = maximized;
+	Window::maximized = maximize;
 }

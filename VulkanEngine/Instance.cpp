@@ -40,54 +40,48 @@ void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& create
 	createInfo.pfnUserCallback = DebugCallback;
 }
 
-Instance::Instance()
-{
-	instance = VK_NULL_HANDLE;
-	surface = VK_NULL_HANDLE;
-	allocator = VK_NULL_HANDLE;
-	debugMessenger = VK_NULL_HANDLE;
-	applicationName = "App";
-	engineName = "Vulkan Engine";
-	enableValidationLayers = true;
-	dirty = true;
-}
-
-void Instance::Create(GLFWwindow* window)
+void Instance::Create()
 {
 	std::cout << "Creating Instance" << std::endl;
 
-	//all avalible layers
-	uint32_t layerCount;
-	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-	validationLayers.resize(layerCount);
-	activeValidationLayers.resize(layerCount);
-	vkEnumerateInstanceLayerProperties(&layerCount, validationLayers.data());
-
-	//all available extensions
-	uint32_t extensionCount = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, 0);
-	extensions.resize(extensionCount);
-	activeExtensions.resize(extensionCount);
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-
-	//api version
-	vkEnumerateInstanceVersion(&apiVersion);
-
-	//active default khronos validation layer
-	bool khronosAvailable = false;
-	for (int i = 0; i < validationLayers.size(); i++)
+	static bool firstInit = true;
+	if (firstInit)
 	{
-		activeValidationLayers[i] = false;
-		if (strcmp("VK_LAYER_KHRONOS_validation", validationLayers[i].layerName) == 0)
-		{
-			activeValidationLayers[i] = true;
-			khronosAvailable = true;
-			break;
-		}
-	}
+		firstInit = false;
+		//all avalible layers
+		uint32_t layerCount;
+		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+		validationLayers.resize(layerCount);
+		activeValidationLayers.resize(layerCount);
+		vkEnumerateInstanceLayerProperties(&layerCount, validationLayers.data());
 
-	if (enableValidationLayers && !khronosAvailable) {
-		std::cerr << "Default validation layer not available!" << std::endl;
+		//all available extensions
+		uint32_t extensionCount = 0;
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, 0);
+		extensions.resize(extensionCount);
+		activeExtensions.resize(extensionCount);
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+		//api version
+		vkEnumerateInstanceVersion(&apiVersion);
+
+		//active default khronos validation layer
+		bool khronosAvailable = false;
+		for (int i = 0; i < validationLayers.size(); i++)
+		{
+			activeValidationLayers[i] = false;
+			if (strcmp("VK_LAYER_KHRONOS_validation", validationLayers[i].layerName) == 0)
+			{
+				activeValidationLayers[i] = true;
+				khronosAvailable = true;
+				break;
+			}
+		}
+
+		if (enableValidationLayers && !khronosAvailable) 
+		{
+			std::cerr << "Default validation layer not available!" << std::endl;
+		}
 	}
 
 	//active vulkan layer
@@ -119,9 +113,12 @@ void Instance::Create(GLFWwindow* window)
 	auto requiredExtensions = getRequiredExtensions();
 
 	//set to active all extensions that we enabled
-	for (size_t i = 0; i < requiredExtensions.size(); i++) {
-		for (size_t j = 0; j < extensions.size(); j++) {
-			if (strcmp(requiredExtensions[i], extensions[j].extensionName) == 0) {
+	for (size_t i = 0; i < requiredExtensions.size(); i++) 
+	{
+		for (size_t j = 0; j < extensions.size(); j++) 
+		{
+			if (strcmp(requiredExtensions[i], extensions[j].extensionName) == 0) 
+			{
 				activeExtensions[j] = true;
 				break;
 			}
@@ -130,8 +127,10 @@ void Instance::Create(GLFWwindow* window)
 
 	//get the name of all extensions that we enabled
 	activeExtensionsNames.clear();
-	for (size_t i = 0; i < extensions.size(); i++) {
-		if (activeExtensions[i]) {
+	for (size_t i = 0; i < extensions.size(); i++) 
+	{
+		if (activeExtensions[i]) 
+		{
 			activeExtensionsNames.push_back(extensions[i].extensionName);
 		}
 	}
@@ -164,13 +163,13 @@ void Instance::Create(GLFWwindow* window)
 
 	setupDebugMessenger();
 
-	createSurface(window);
+	createSurface();
 	std::cout << "Created surface" << std::endl;
 
 	dirty = false;
 }
 
-void Instance::Destory()
+void Instance::Destroy()
 {
 	activeValidationLayersNames.clear();
 	activeExtensionsNames.clear();
@@ -184,36 +183,6 @@ void Instance::Destory()
 	std::cout << "Destroyed surface" << std::endl;
 	vkDestroyInstance(instance, allocator);
 	std::cout << "Destroyed instance" << std::endl;
-}
-
-VkInstance Instance::GetInstance()
-{
-	return instance;
-}
-
-VkSurfaceKHR Instance::GetSurface()
-{
-	return surface;
-}
-
-VkAllocationCallbacks* Instance::GetAllocator()
-{
-	return allocator;
-}
-
-bool Instance::IsDirty()
-{
-	return dirty;
-}
-
-bool Instance::IsValidationLayersEnabled()
-{
-	return enableValidationLayers;
-}
-
-std::vector<const char*> Instance::GetValidationLayers()
-{
-	return activeValidationLayersNames;
 }
 
 std::vector<const char*> Instance::getRequiredExtensions()
@@ -245,9 +214,9 @@ void Instance::setupDebugMessenger()
 	}
 }
 
-void Instance::createSurface(GLFWwindow* window)
+void Instance::createSurface()
 {
-	if (glfwCreateWindowSurface(instance, window, allocator, &surface) != VK_SUCCESS)
+	if (glfwCreateWindowSurface(instance, Window::GetGLFWwindow(), allocator, &surface) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create window surface!");
 	}

@@ -143,8 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="Instance.cpp" />
+    <ClCompile Include="LogicalDevice.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PhysicalDevice.cpp" />
+    <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -166,7 +171,12 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="Instance.h" />
+    <ClInclude Include="LogicalDevice.h" />
+    <ClInclude Include="PhysicalDevice.h" />
+    <ClInclude Include="SwapChain.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
