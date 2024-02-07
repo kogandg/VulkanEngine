@@ -89,3 +89,18 @@ void LogicalDevice::Destroy()
 	presentQueue = VK_NULL_HANDLE;
 	graphicsQueue = VK_NULL_HANDLE;
 }
+
+void LogicalDevice::OnImgui()
+{
+    if (ImGui::CollapsingHeader("Logical Device")) 
+    {
+        if (ImGui::TreeNode("Active Extensions")) 
+        {
+            for (auto ext : PhysicalDevice::GetRequiredExtensions()) 
+            {
+                ImGui::BulletText("%s", ext);
+            }
+            ImGui::TreePop();
+        }
+    }
+}

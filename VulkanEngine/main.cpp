@@ -26,6 +26,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
@@ -36,6 +38,17 @@
 #include <tiny_obj_loader.h>
 
 #include <glm/gtx/quaternion.hpp>
+
+
+#include "imgui/imgui.h"
+
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_vulkan.h"
+#ifdef _DEBUG
+#define IMGUI_VULKAN_DEBUG_REPORT
+#endif
+
+#include "imgui/ImGuizmo.h"
 
 
 //const uint32_t WIDTH = 800;
@@ -89,6 +102,19 @@ const std::string TEXTURE_PATH = "viking_room.png";
 //	std::vector<VkSurfaceFormatKHR> formats;
 //	std::vector<VkPresentModeKHR> presentModes;
 //};
+
+void CheckVulkanResult(VkResult res) 
+{
+    if (res == 0) 
+    {
+        return;
+    }
+    std::cerr << "vulkan error during some imgui operation: " << res << '\n';
+    if (res < 0) 
+    {
+        throw std::runtime_error("");
+    }
+}
 
 struct Vertex
 {
@@ -174,7 +200,8 @@ class HelloTriangleApplication
 public:
 	void run()
 	{
-		Window::Create();
+		//Window::Create();
+        firstInitImgui();
 		//initWindow();
 		initVulkan();
 		mainLoop();
@@ -227,15 +254,23 @@ private:
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 
     UniformBufferObject ubo;
+    Transform transform;
+
+    //imgui
+    ImDrawData* imguiDrawData = nullptr;
 
 	void initVulkan()
 	{
+        Window::Create();
+
         currentFrame = 0;
         Instance::Create();
         PhysicalDevice::Create();
         LogicalDevice::Create();
         SwapChain::Create();
         MAX_FRAMES_IN_FLIGHT = SwapChain::GetFramesInFlight();
+
+        auto alloc = Instance::GetAllocator();
 
         std::cout << "Finish creating SwapChain" << std::endl;
 
@@ -256,6 +291,9 @@ private:
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+
+        initImgui();
+
         createUniformModelView();
         createUniformProjection();
 
@@ -265,6 +303,7 @@ private:
     void cleanup() 
     {
         cleanupVulkan();
+        finishImgui();
     }
 
     void cleanupVulkan() 
@@ -323,8 +362,12 @@ private:
 
         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
+        cleanupImgui();
+
         SwapChain::Destroy();
         std::cout << "Destroyed SwapChain" << std::endl;
+
+
 
         commandBuffers.clear();
         imageAvailableSemaphores.clear();
@@ -630,6 +673,97 @@ private:
         }
     }
 
+    void imguiDrawFrame()
+    {
+        auto device = LogicalDevice::GetVkDevice();
+        auto instance = Instance::GetInstance();
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        if (ImGui::Begin("Vulkan")) 
+        {
+            Window::OnImgui();
+            Instance::OnImgui();
+            PhysicalDevice::OnImgui();
+            LogicalDevice::OnImgui();
+            SwapChain::OnImgui();
+            camera.OnImgui();
+        }
+        ImGui::End();
+
+        ImGuizmo::BeginFrame();
+        static ImGuizmo::OPERATION currentGizmoOperation = ImGuizmo::ROTATE;
+        static ImGuizmo::MODE currentGizmoMode = ImGuizmo::WORLD;
+
+        if (ImGui::Begin("Transform")) {
+            if (ImGui::IsKeyPressed((ImGuiKey)GLFW_KEY_1)) 
+            {
+                currentGizmoOperation = ImGuizmo::TRANSLATE;
+            }
+            if (ImGui::IsKeyPressed((ImGuiKey)GLFW_KEY_2))
+            {
+                currentGizmoOperation = ImGuizmo::ROTATE;
+            }
+            if (ImGui::IsKeyPressed((ImGuiKey)GLFW_KEY_3))
+            {
+                currentGizmoOperation = ImGuizmo::SCALE;
+            }
+            if (ImGui::RadioButton("Translate", currentGizmoOperation == ImGuizmo::TRANSLATE)) 
+            {
+                currentGizmoOperation = ImGuizmo::TRANSLATE;
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Rotate", currentGizmoOperation == ImGuizmo::ROTATE)) 
+            {
+                currentGizmoOperation = ImGuizmo::ROTATE;
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Scale", currentGizmoOperation == ImGuizmo::SCALE)) {
+                currentGizmoOperation = ImGuizmo::SCALE;
+            }
+
+            ImGui::InputFloat3("Position", glm::value_ptr(transform.position));
+            ImGui::InputFloat3("Rotation", glm::value_ptr(transform.rotation));
+            ImGui::InputFloat3("Scale", glm::value_ptr(transform.scale));
+            ImGuizmo::RecomposeMatrixFromComponents(glm::value_ptr(transform.position), glm::value_ptr(transform.rotation),
+                glm::value_ptr(transform.scale), glm::value_ptr(ubo.model));
+
+            if (currentGizmoOperation != ImGuizmo::SCALE) {
+                if (ImGui::RadioButton("Local", currentGizmoMode == ImGuizmo::LOCAL)) 
+                {
+                    currentGizmoMode = ImGuizmo::LOCAL;
+                }
+                ImGui::SameLine();
+                if (ImGui::RadioButton("World", currentGizmoMode == ImGuizmo::WORLD)) 
+                {
+                    currentGizmoMode = ImGuizmo::WORLD;
+                }
+            }
+            else 
+            {
+                currentGizmoMode = ImGuizmo::LOCAL;
+            }
+
+            glm::mat4 guizmoProj(ubo.proj);
+            guizmoProj[1][1] *= -1;
+
+            ImGuiIO& io = ImGui::GetIO();
+            ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+            ImGuizmo::Manipulate(glm::value_ptr(ubo.view), glm::value_ptr(guizmoProj), currentGizmoOperation,
+                currentGizmoMode, glm::value_ptr(ubo.model), nullptr, nullptr);
+            ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(ubo.model), glm::value_ptr(transform.position),
+                glm::value_ptr(transform.rotation), glm::value_ptr(transform.scale));
+        }
+        ImGui::End();
+
+        ImGui::ShowDemoWindow();
+
+        ImGui::Render();
+        imguiDrawData = ImGui::GetDrawData();
+
+    }
+
     void updateCommandBuffer(size_t frameIndex) 
     {
         auto device = LogicalDevice::GetVkDevice();
@@ -673,6 +807,9 @@ private:
         vkCmdBindDescriptorSets(commandBuffers[frameIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[frameIndex], 0, nullptr);
         vkCmdDrawIndexed(commandBuffers[frameIndex], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
+        //imgui draw
+        ImGui_ImplVulkan_RenderDrawData(imguiDrawData, commandBuffers[frameIndex]);
+
         vkCmdEndRenderPass(commandBuffers[frameIndex]);
 
         if (vkEndCommandBuffer(commandBuffers[frameIndex]) != VK_SUCCESS) 
@@ -702,6 +839,7 @@ private:
         }
 
         updateUniformBuffer(imageIndex);
+        imguiDrawFrame();
 
         // check if a previous frame is using this image
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
@@ -782,6 +920,8 @@ private:
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+
+        initImgui();
         
         createUniformProjection();
     }
@@ -1447,6 +1587,56 @@ private:
             }
         }
     }
+
+    void firstInitImgui() 
+    {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::StyleColorsDark();
+    }
+
+    void initImgui() 
+    {
+        auto device = LogicalDevice::GetVkDevice();
+        auto instance = Instance::GetInstance();
+
+        auto alloc = Instance::GetAllocator();
+
+        ImGui_ImplGlfw_InitForVulkan(Window::GetGLFWwindow(), true);
+
+        ImGui_ImplVulkan_InitInfo initInfo{};
+        initInfo.Instance = instance;
+        initInfo.PhysicalDevice = PhysicalDevice::GetVkPhysicalDevice();
+        initInfo.Device = device;
+        initInfo.QueueFamily = PhysicalDevice::GetGraphicsFamily();
+        initInfo.Queue = LogicalDevice::GetGraphicsQueue();
+        initInfo.PipelineCache = VK_NULL_HANDLE;
+        initInfo.DescriptorPool = descriptorPool;
+        initInfo.MinImageCount = 2;
+        initInfo.ImageCount = (uint32_t)SwapChain::GetNumFrames();
+        initInfo.MSAASamples = SwapChain::GetNumSamples();
+        initInfo.Allocator = Instance::GetAllocator();
+        initInfo.CheckVkResultFn = CheckVulkanResult;
+        ImGui_ImplVulkan_Init(&initInfo, SwapChain::GetRenderPass());
+
+        auto commandBuffer = beginSingleTimeCommands();
+        ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+        endSingleTimeCommands(commandBuffer);
+        ImGui_ImplVulkan_DestroyFontUploadObjects();
+    }
+
+    void cleanupImgui() 
+    {
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+    }
+
+    void finishImgui() 
+    {
+        ImGui::DestroyContext();
+    }
+
 };
 
 int main()

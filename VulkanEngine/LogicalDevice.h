@@ -11,6 +11,8 @@ public:
     static void Create();
     static void Destroy();
 
+    static void OnImgui();
+
     static inline VkDevice GetVkDevice() { return device; }
     static inline VkQueue GetPresentQueue() { return presentQueue; }
     static inline VkQueue GetGraphicsQueue() { return graphicsQueue; }

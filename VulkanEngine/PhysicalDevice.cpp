@@ -193,3 +193,172 @@ bool PhysicalDevice::SupportFormat(VkFormat format, VkImageTiling tiling, VkForm
 
 	return false;
 }
+
+void PhysicalDevice::OnImgui()
+{
+    const auto totalSpace = ImGui::GetContentRegionAvail();
+    const float totalWidth = totalSpace.x;
+
+    if (ImGui::CollapsingHeader("Physical Device")) {
+        for (size_t i = 0; i < allDevices.size(); i++) {
+            auto d = allDevices[i];
+            ImGui::PushID(d.properties.deviceID);
+            if (ImGui::RadioButton("", i == index) && i != index) 
+            {
+                index = i;
+                dirty = true;
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+            if (ImGui::TreeNode(d.properties.deviceName)) 
+            {
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("API Version: %d", d.properties.apiVersion);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("Driver Version: %d", d.properties.driverVersion);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("Max Samples: %d", d.maxSamples);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                auto minExt = d.capabilities.minImageExtent;
+                ImGui::Text("Min extent: {%d, %d}", minExt.width, minExt.height);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                auto maxExt = d.capabilities.maxImageExtent;
+                ImGui::Text("Max extent: {%d, %d}", maxExt.width, maxExt.height);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("Min image count: %d", d.capabilities.minImageCount);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("Max image count: %d", d.capabilities.maxImageCount);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("Graphics Family: %d", d.graphicsFamily);
+                ImGui::Dummy(ImVec2(5.0f, .0f));
+                ImGui::SameLine();
+                ImGui::Text("Present Family: %d", d.presentFamily);
+                ImGui::Separator();
+                if (ImGui::TreeNode("Extensions")) 
+                {
+                    ImGuiTableFlags flags = ImGuiTableFlags_ScrollY;
+                    flags |= ImGuiTableFlags_RowBg;
+                    flags |= ImGuiTableFlags_BordersOuter;
+                    flags |= ImGuiTableFlags_BordersV;
+                    flags |= ImGuiTableFlags_Resizable;
+                    ImVec2 maxSize = ImVec2(0.0f, 200.0f);
+                    if (ImGui::BeginTable("extTable", 2, flags, maxSize)) 
+                    {
+                        ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
+                        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Spec Version", ImGuiTableColumnFlags_None);
+                        ImGui::TableHeadersRow();
+                        for (auto& ext : d.extensions) 
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+                            ImGui::Text("%s", ext.extensionName);
+                            ImGui::TableSetColumnIndex(1);
+                            ImGui::Text("%d", ext.specVersion);
+                        }
+                        ImGui::EndTable();
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::Separator();
+                if (ImGui::TreeNode("Families")) 
+                {
+                    ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
+                    // flags |= ImGuiTableFlags_ScrollX;
+                    flags |= ImGuiTableFlags_BordersOuter;
+                    flags |= ImGuiTableFlags_BordersV;
+                    if (ImGui::BeginTable("famTable", 8, flags)) 
+                    {
+                        ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Count", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Graphics", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Compute", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Transfer", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Sparse", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Protected", ImGuiTableColumnFlags_None);
+                        ImGui::TableSetupColumn("Min Granularity", ImGuiTableColumnFlags_None);
+                        ImGui::TableHeadersRow();
+                        for (size_t j = 0; j < d.families.size(); j++) 
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+                            ImGui::Text("%zu", j);
+                            ImGui::TableSetColumnIndex(1);
+                            ImGui::Text("%d", d.families[j].queueCount);
+                            ImGui::TableSetColumnIndex(2);
+                            ImGui::Text("%c", (d.families[j].queueFlags & VK_QUEUE_GRAPHICS_BIT) ? 'X' : ' ');
+                            ImGui::TableSetColumnIndex(3);
+                            ImGui::Text("%c", (d.families[j].queueFlags & VK_QUEUE_COMPUTE_BIT) ? 'X' : ' ');
+                            ImGui::TableSetColumnIndex(4);
+                            ImGui::Text("%c", (d.families[j].queueFlags & VK_QUEUE_TRANSFER_BIT) ? 'X' : ' ');
+                            ImGui::TableSetColumnIndex(5);
+                            ImGui::Text("%c", (d.families[j].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) ? 'X' : ' ');
+                            ImGui::TableSetColumnIndex(6);
+                            ImGui::Text("%c", (d.families[j].queueFlags & VK_QUEUE_PROTECTED_BIT) ? 'X' : ' ');
+                            ImGui::TableSetColumnIndex(7);
+                            auto min = d.families[j].minImageTransferGranularity;
+                            ImGui::Text("%d, %d, %d", min.width, min.height, min.depth);
+                        }
+                        ImGui::EndTable();
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::Separator();
+                if (ImGui::TreeNode("Present Modes")) 
+                {
+                    ImGuiTableFlags flags = ImGuiTableFlags_RowBg;
+                    // flags |= ImGuiTableFlags_ScrollX;
+                    flags |= ImGuiTableFlags_BordersOuter;
+                    flags |= ImGuiTableFlags_BordersV;
+                    if (ImGui::BeginTable("presentModes", 1, flags)) 
+                    {
+                        for (const auto& p : d.presentModes) 
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+                            if (p == VK_PRESENT_MODE_FIFO_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_FIFO_KHR");
+                            }
+                            else if (p == VK_PRESENT_MODE_FIFO_RELAXED_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_FIFO_RELAXED_KHR");
+                            }
+                            else if (p == VK_PRESENT_MODE_IMMEDIATE_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_IMMEDIATE_KHR");
+                            }
+                            else if (p == VK_PRESENT_MODE_MAILBOX_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_MAILBOX_KHR");
+                            }
+                            else if (p == VK_PRESENT_MODE_MAX_ENUM_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_MAX_ENUM_KHR");
+                            }
+                            else if (p == VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR");
+                            }
+                            else if (p == VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR) 
+                            {
+                                ImGui::Text("VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR");
+                            }
+                        }
+                        ImGui::EndTable();
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();
+            }
+        }
+    }
+}

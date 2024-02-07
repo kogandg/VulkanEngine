@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <chrono>
 
+#include "imgui/imgui.h"
+
 class Window
 {
 public:
@@ -12,13 +14,15 @@ public:
     static void Destroy();
     static void UpdateFramebufferSize();
 
+    static void OnImgui();
+
     static inline GLFWwindow* GetGLFWwindow() { return window; }
     static inline bool IsDirty() { return dirty; }
     static inline void WaitEvents() { glfwWaitEvents(); }
     static inline uint32_t GetWidth() { return width; }
     static inline uint32_t GetHeight() { return height; }
     static inline float GetDeltaTime() { return deltaTime; }
-    static inline bool GetShouldClose() { return glfwWindowShouldClose(window); }
+    static inline bool GetShouldClose() { return glfwWindowShouldClose(window) || IsKeyDown(GLFW_KEY_ESCAPE); }
     static inline float GetDeltaScroll() { return deltaScroll; }
     static inline glm::vec2 GetDeltaMouse() { return deltaMousePos; }
     static inline bool GetFramebufferResized() { return framebufferResized; }

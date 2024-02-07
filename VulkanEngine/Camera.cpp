@@ -125,6 +125,149 @@ void Camera::SetExtent(float width, float height)
 	updateProj();
 }
 
+void Camera::OnImgui()
+{
+	const auto totalSpace = ImGui::GetContentRegionAvail();
+	const float totalWidth = totalSpace.x;
+
+	auto viewDirty = false;
+	auto projDirty = false;
+
+	if (ImGui::CollapsingHeader("Camera")) 
+	{
+		// type
+		{
+			ImGui::Text("Projection:");
+			ImGui::SameLine(totalWidth / 3.0f);
+			if (ImGui::RadioButton("Perspective", type == Type::Perspective)) 
+			{
+				type = Type::Perspective;
+				projDirty = true;
+				viewDirty = true;
+			}
+			ImGui::SameLine(2 * totalWidth / 3.0f);
+			if (ImGui::RadioButton("Orthographic", type == Type::Orthographic)) 
+			{
+				type = Type::Orthographic;
+				viewDirty = true;
+				projDirty = true;
+			}
+		}
+		// control mode
+		{
+			ImGui::Text("Control:");
+			ImGui::SameLine(totalWidth / 3.0f);
+			if (ImGui::RadioButton("Orbit", mode == Control::Orbit) && mode != Control::Orbit) 
+			{
+				setControl(Control::Orbit);
+				viewDirty = true;
+			}
+			ImGui::SameLine(2 * totalWidth / 3.0f);
+			if (ImGui::RadioButton("Fly", mode == Control::Fly) && mode != Control::Fly) 
+			{
+				setControl(Control::Fly);
+				viewDirty = true;
+			}
+		}
+		// parameters
+		{
+			switch (type) 
+			{
+			case Type::Orthographic:
+				break;
+			case Type::Perspective:
+				ImGui::Text("Horizontal Fov");
+				ImGui::SameLine(totalWidth / 3.0f);
+				ImGui::PushID("fov");
+				projDirty |= ImGui::DragFloat("", &horizontalFov, 1, 30, 120);
+				ImGui::PopID();
+				break;
+			}
+			ImGui::Text("Near");
+			ImGui::SameLine(totalWidth / 3.0f);
+			ImGui::PushID("near");
+			if (type == Type::Orthographic) 
+			{
+				projDirty |= ImGui::DragFloat("", &orthoNearDistance, 1, -10000000, -1);
+			}
+			else 
+			{
+				projDirty |= ImGui::DragFloat("", &nearDistance, 0.001, 0.000001, 10);
+			}
+			ImGui::PopID();
+			ImGui::Text("Far");
+			ImGui::SameLine(totalWidth / 3.0f);
+			ImGui::PushID("far");
+			if (type == Type::Orthographic) 
+			{
+				projDirty |= ImGui::DragFloat("", &orthoFarDistance, 1, 1, 10000000);
+			}
+			else {
+				projDirty |= ImGui::DragFloat("", &farDistance, 1, 1, 10000000);
+			}
+			ImGui::PopID();
+			if (mode == Control::Fly) 
+			{
+				ImGui::Text("Eye");
+				ImGui::SameLine(totalWidth / 3.0f);
+				ImGui::PushID("eye");
+				viewDirty |= ImGui::DragFloat3("", glm::value_ptr(eye));
+				ImGui::PopID();
+			}
+			else 
+			{
+				ImGui::Text("Center");
+				ImGui::SameLine(totalWidth / 3.0f);
+				ImGui::PushID("center");
+				viewDirty |= ImGui::DragFloat3("", glm::value_ptr(center));
+				ImGui::PopID();
+			}
+			ImGui::Text("Rotation");
+			ImGui::SameLine(totalWidth / 3.0f);
+			ImGui::PushID("rotation");
+			viewDirty |= ImGui::DragFloat3("", glm::value_ptr(rotation));
+			ImGui::PopID();
+			ImGui::Text("Zoom");
+			ImGui::SameLine(totalWidth / 3.0f);
+			ImGui::PushID("zoom");
+			viewDirty |= ImGui::DragFloat("", &zoom, 0.1, 0.0001, 10000);
+			ImGui::PopID();
+		}
+		// static parameters
+		{
+			if (ImGui::TreeNode("Speeds")) 
+			{
+				ImGui::Text("Movement");
+				ImGui::SameLine(totalWidth / 3.0f);
+				ImGui::PushID("mov");
+				ImGui::DragFloat("", &speed, 0.0001, 0, 0.05);
+				ImGui::PopID();
+				ImGui::Text("Rotation");
+				ImGui::SameLine(totalWidth / 3.0f);
+				ImGui::PushID("rot");
+				ImGui::DragFloat("", &rotationSpeed, 0.001, 0, 1);
+				ImGui::PopID();
+				ImGui::Text("Zoom");
+				ImGui::SameLine(totalWidth / 3.0f);
+				ImGui::PushID("zoom");
+				ImGui::DragFloat("", &zoomSpeed, 0.001, 0, 1);
+				ImGui::PopID();
+				ImGui::TreePop();
+			}
+		}
+
+		if (viewDirty) 
+		{
+			updateView();
+		}
+
+		if (projDirty) 
+		{
+			updateProj();
+		}
+	}
+}
+
 const glm::mat4& Camera::GetView()
 {
 	return view;

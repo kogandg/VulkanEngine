@@ -7,12 +7,15 @@
 #include "PhysicalDevice.h"
 #include "Window.h"
 #include "Instance.h"
+#include "VulkanUtils.h"
 
 class SwapChain
 {
 public:
     static void Create();
     static void Destroy();
+
+    static void OnImgui();
      
     static inline bool IsDirty() { return dirty; }
     static inline VkExtent2D GetExtent() { return extent; }

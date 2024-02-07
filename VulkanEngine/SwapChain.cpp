@@ -311,6 +311,152 @@ void SwapChain::Destroy()
     renderPass = VK_NULL_HANDLE;
 }
 
+void SwapChain::OnImgui()
+{
+    const auto totalSpace = ImGui::GetContentRegionAvail();
+    const float totalWidth = totalSpace.x;
+
+    const auto cap = PhysicalDevice::GetCapabilities();
+
+    if (ImGui::CollapsingHeader("SwapChain")) 
+    {
+        // Frames in Flight
+        {
+            ImGui::Text("Frames In Flight");
+            ImGui::SameLine(totalWidth * 3.0 / 5.0f);
+            ImGui::SetNextItemWidth(totalWidth * 2.0 / 5.0f);
+            ImGui::PushID("framesInFlight");
+            newFramesInFlight = framesInFlight;
+            if (ImGui::InputInt("", &newFramesInFlight)) 
+            {
+                if (newFramesInFlight != framesInFlight) 
+                {
+                    dirty = true;
+                }
+                if (newFramesInFlight < 1) 
+                {
+                    newFramesInFlight = 1;
+                }
+                else if (newFramesInFlight + additionalImages < cap.minImageCount) 
+                {
+                    newFramesInFlight = cap.minImageCount - additionalImages;
+                }
+                else if (cap.maxImageCount > 0 && newFramesInFlight + additionalImages > cap.maxImageCount) 
+                {
+                    newFramesInFlight = cap.maxImageCount - additionalImages;
+                }
+                else 
+                {
+                    framesInFlight = newFramesInFlight;
+                }
+            }
+            ImGui::PopID();
+        }
+        // Additional SwapChain images
+        {
+            ImGui::Text("Additional SwapChain Images");
+            ImGui::SameLine(totalWidth * 3.0 / 5.0f);
+            ImGui::SetNextItemWidth(totalWidth * 2.0 / 5.0f);
+            ImGui::PushID("additionalSwapChainImages");
+            newAdditionalImages = additionalImages;
+            if (ImGui::InputInt("", &newAdditionalImages)) 
+            {
+                if (newAdditionalImages != additionalImages) 
+                {
+                    dirty = true;
+                }
+                if (newAdditionalImages + framesInFlight < cap.minImageCount || newAdditionalImages < 0) 
+                {
+                    newAdditionalImages = cap.minImageCount - framesInFlight;
+                }
+                else if (cap.maxImageCount > 0 && newAdditionalImages + framesInFlight > cap.maxImageCount) 
+                {
+                    newAdditionalImages = cap.maxImageCount - framesInFlight;
+                }
+                else 
+                {
+                    additionalImages = newAdditionalImages;
+                }
+            }
+            ImGui::PopID();
+        }
+        // Present Mode
+        {
+            ImGui::Text("Present Mode");
+            ImGui::SameLine(totalWidth * 3.0 / 5.0f);
+            ImGui::SetNextItemWidth(totalWidth * 2.0 / 5.0f);
+            ImGui::PushID("presentMode");
+            if (ImGui::BeginCombo("", VkPresentModeKHRStr(presentMode))) 
+            {
+                for (auto mode : PhysicalDevice::GetPresentModes()) 
+                {
+                    bool selected = mode == presentMode;
+                    if (ImGui::Selectable(VkPresentModeKHRStr(mode), selected) && !selected) 
+                    {
+                        presentMode = mode;
+                        dirty = true;
+                    }
+                    if (selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+        // Num Samples
+        {
+            ImGui::Text("Num Samples");
+            ImGui::SameLine(totalWidth * 3.0 / 5.0f);
+            ImGui::SetNextItemWidth(totalWidth * 2.0 / 5.0f);
+            ImGui::PushID("samplesCombo");
+            if (ImGui::BeginCombo("", VkSampleCountFlagBitsStr(numSamples))) 
+            {
+                for (size_t i = 1; i <= PhysicalDevice::GetMaxSamples(); i *= 2) 
+                {
+                    VkSampleCountFlagBits curSamples = (VkSampleCountFlagBits)i;
+                    bool selected = curSamples == numSamples;
+                    if (ImGui::Selectable(VkSampleCountFlagBitsStr(curSamples), selected) && !selected) 
+                    {
+                        numSamples = curSamples;
+                        dirty = true;
+                    }
+                    if (selected) 
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+        // Surface Format
+        {
+            if (ImGui::TreeNode("Surface Format")) 
+            {
+                auto surfaceFormats = PhysicalDevice::GetSurfaceFormats();
+                for (size_t i = 0; i < surfaceFormats.size(); i++) 
+                {
+                    const char* formatName = VkFormatStr(surfaceFormats[i].format);
+                    const char* spaceName = VkColorSpaceKHRStr(surfaceFormats[i].colorSpace);
+                    bool selected = (surfaceFormats[i].colorSpace == colorSpace && surfaceFormats[i].format == colorFormat);
+                    ImGui::PushID(i);
+                    if (ImGui::RadioButton("", selected)) 
+                    {
+                        colorFormat = surfaceFormats[i].format;
+                        colorSpace = surfaceFormats[i].colorSpace;
+                        dirty = true;
+                    }
+                    ImGui::PopID();
+                    ImGui::SameLine();
+                    ImGui::TextWrapped("%s, %s", formatName, spaceName);
+                }
+                ImGui::TreePop();
+            }
+        }
+    }
+}
+
 VkExtent2D SwapChain::chooseExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 {
     if (capabilities.currentExtent.width != UINT32_MAX) 

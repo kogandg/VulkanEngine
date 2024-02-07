@@ -16,6 +16,8 @@ public:
     static uint32_t FindMemoryType(uint32_t type, VkMemoryPropertyFlags properties);
     static bool SupportFormat(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
+    static void OnImgui();
+
     static inline bool IsDirty() { return dirty; }
     static inline VkPhysicalDevice GetVkPhysicalDevice() { return device->vkDevice; }
     static inline VkPhysicalDeviceFeatures GetFeatures() { return device->features; }

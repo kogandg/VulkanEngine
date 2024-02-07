@@ -14,6 +14,8 @@ public:
 	static void Create();
 	static void Destroy();
 
+	static void OnImgui();
+
 	static inline VkInstance GetInstance() { return instance; }
 	static inline VkSurfaceKHR GetSurface() { return surface; }
 	static inline VkAllocationCallbacks* GetAllocator() { return allocator; }

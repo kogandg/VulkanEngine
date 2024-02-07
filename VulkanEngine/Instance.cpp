@@ -185,6 +185,94 @@ void Instance::Destroy()
 	std::cout << "Destroyed instance" << std::endl;
 }
 
+void Instance::OnImgui()
+{
+	if (ImGui::CollapsingHeader("Instance")) 
+	{
+		const auto totalSpace = ImGui::GetContentRegionAvail();
+		const float totalWidth = totalSpace.x;
+
+		ImGui::Text("API Version");
+		ImGui::SameLine(totalWidth / 2);
+		ImGui::PushID("apiVersion");
+		ImGui::Text("%d", apiVersion);
+		ImGui::PopID();
+		ImGui::Text("Application");
+		ImGui::SameLine(totalWidth / 2);
+		ImGui::PushID("appName");
+		ImGui::InputText("", &applicationName[0], 256);
+		ImGui::PopID();
+		ImGui::Text("Engine");
+		ImGui::SameLine(totalWidth / 2);
+		ImGui::PushID("engineName");
+		ImGui::InputText("", &engineName[0], 256);
+		ImGui::PopID();
+		ImGui::Text("Enable Validation Layers");
+		ImGui::SameLine(totalWidth / 2);
+		ImGui::PushID("enableValidation");
+		ImGui::Checkbox("", &enableValidationLayers);
+		ImGui::PopID();
+		ImGui::Separator();
+		if (ImGui::TreeNode("Validation Layers")) 
+		{
+			for (size_t i = 0; i < validationLayers.size(); i++) {
+				ImGui::PushID(i);
+				bool active = activeValidationLayers[i];
+				ImGui::Checkbox("", &active);
+				activeValidationLayers[i] = active;
+				ImGui::SameLine();
+				const auto& layer = validationLayers[i];
+				if (ImGui::TreeNode(layer.layerName)) {
+					// description
+					ImGui::Dummy(ImVec2(5.0f, .0f));
+					ImGui::SameLine();
+					ImGui::Text("Description: %s", layer.description);
+					// spec version
+					ImGui::Dummy(ImVec2(5.0f, .0f));
+					ImGui::SameLine();
+					ImGui::Text("Spec Version: %d", layer.specVersion);
+					// impl version
+					ImGui::Dummy(ImVec2(5.0f, .0f));
+					ImGui::SameLine();
+					ImGui::Text("Implementation Version: %d", layer.implementationVersion);
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+		ImGui::Separator();
+		if (ImGui::TreeNode("Extensions")) 
+		{
+			for (size_t i = 0; i < extensions.size(); i++) {
+				ImGui::PushID(i);
+				bool active = activeExtensions[i];
+				ImGui::Checkbox("", &active);
+				activeExtensions[i] = active;
+				ImGui::PopID();
+				ImGui::SameLine();
+				const auto& ext = extensions[i];
+				if (ImGui::TreeNode(ext.extensionName)) {
+					ImGui::Dummy(ImVec2(5.0f, .0f));
+					ImGui::SameLine();
+					ImGui::Text("Spec Version: %d", ext.specVersion);
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::Separator();
+		if (ImGui::Button("Apply Changes")) 
+		{
+			dirty = true;
+		}
+	}
+	if (ImGui::IsKeyPressed((ImGuiKey)GLFW_KEY_I)) 
+	{
+		dirty = true;
+	}
+}
+
 std::vector<const char*> Instance::getRequiredExtensions()
 {
 	uint32_t glfwExtensionCount = 0;

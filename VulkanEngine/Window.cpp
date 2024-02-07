@@ -14,7 +14,7 @@ void Window::Create()
 	{
 	case Window::Mode::Windowed:
 		window = glfwCreateWindow(width, height, name, nullptr, nullptr);
-		glfwSetWindowPos(window, posX, posY);
+		glfwSetWindowPos(window, 100, 100);
 
 		if (maximized)
 		{
@@ -76,6 +76,119 @@ void Window::UpdateFramebufferSize()
 {
 	framebufferResized = false;
 	glfwGetFramebufferSize(window, &width, &height);
+}
+
+void Window::OnImgui()
+{
+    const auto totalSpace = ImGui::GetContentRegionAvail();
+    const float totalWidth = totalSpace.x;
+
+    if (ImGui::CollapsingHeader("Window")) 
+    {
+        // mode
+        {
+            const char* modeNames[] = { "Windowed", "Windowed FullScreen", "FullScreen" };
+            ImGui::Text("Mode");
+            ImGui::SameLine(totalWidth / 2.0f);
+            ImGui::SetNextItemWidth(totalWidth / 2.0f);
+            ImGui::PushID("modeCombo");
+            if (ImGui::BeginCombo("", modeNames[(int)mode])) 
+            {
+                for (int i = 0; i < 3; i++) {
+                    bool selected = (int)mode == i;
+                    if (ImGui::Selectable(modeNames[i], selected)) 
+                    {
+                        mode = (Window::Mode)i;
+                    }
+                    if (selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::PopID();
+        }
+        if (mode != Mode::Windowed) 
+        {
+            // monitor
+            {
+                ImGui::Text("Monitor");
+                ImGui::SameLine(totalWidth / 2.0f);
+                ImGui::SetNextItemWidth(totalWidth / 2.0f);
+                ImGui::PushID("monitorCombo");
+                if (ImGui::BeginCombo("", glfwGetMonitorName(monitors[monitorIndex]))) 
+                {
+                    for (int i = 0; i < monitorCount; i++) {
+                        bool selected = monitorIndex == i;
+                        ImGui::PushID(i);
+                        if (ImGui::Selectable(glfwGetMonitorName(monitors[i]), selected)) 
+                        {
+                            monitorIndex = i;
+                        }
+                        if (selected) {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::PopID();
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::PopID();
+            }
+        }
+        // resolution
+        {
+            if (mode == Mode::FullScreen || (mode == Mode::Windowed && maximized == false)) 
+            {
+                ImGui::Text("Resolution");
+                ImGui::SameLine(totalWidth / 2.0f);
+                ImGui::SetNextItemWidth(totalWidth / 4.0f);
+                ImGui::PushID("width");
+                ImGui::InputInt("", &width, 1);
+                ImGui::PopID();
+                ImGui::SameLine(3 * totalWidth / 4.0f);
+                ImGui::SetNextItemWidth(totalWidth / 4.0f);
+                ImGui::PushID("height");
+                ImGui::InputInt("", &height, 1);
+                ImGui::PopID();
+            }
+        }
+        // windowed only
+        {
+            if (mode == Mode::Windowed) 
+            {
+                // maximized
+                {
+                    ImGui::Text("Maximized");
+                    ImGui::SameLine(totalWidth / 2.0f);
+                    ImGui::SetNextItemWidth(totalWidth / 2.0f);
+                    ImGui::PushID("maximized");
+                    ImGui::Checkbox("", &maximized);
+                    ImGui::PopID();
+                }
+                // decorated
+                {
+                    ImGui::Text("Decorated");
+                    ImGui::SameLine(totalWidth / 2.0f);
+                    ImGui::SetNextItemWidth(totalWidth / 2.0f);
+                    ImGui::PushID("decorated");
+                    ImGui::Checkbox("", &decorated);
+                    ImGui::PopID();
+                }
+                // resizable
+                {
+                    ImGui::Text("Resizable");
+                    ImGui::SameLine(totalWidth / 2.0f);
+                    ImGui::SetNextItemWidth(totalWidth / 2.0f);
+                    ImGui::PushID("resizable");
+                    ImGui::Checkbox("", &resizable);
+                    ImGui::PopID();
+                }
+            }
+        }
+        if (ImGui::Button("Recreate")) {
+            dirty = true;
+        }
+    }
 }
 
 void Window::scrollCallback(GLFWwindow* window, double x, double y)
