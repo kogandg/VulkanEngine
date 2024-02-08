@@ -76,7 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;C:\Users\denni\Documents\libraries\SPIRV-Reflect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -94,7 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;C:\Users\denni\Documents\libraries\SPIRV-Reflect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;C:\Users\denni\Documents\libraries\SPIRV-Reflect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -130,7 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.268.0\Include;C:\Users\denni\Documents\libraries\glm;C:\Users\denni\Documents\libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\denni\Documents\libraries\stb;C:\Users\denni\Documents\libraries\tinyobjloader;C:\Users\denni\Documents\libraries\SPIRV-Reflect;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -143,7 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Buffers.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FileManager.cpp" />
+    <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />
@@ -158,6 +161,7 @@
     <ClCompile Include="LogicalDevice.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicalDevice.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -180,7 +184,10 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FileManager.h" />
+    <ClInclude Include="GraphicsPipeline.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -195,6 +202,7 @@
     <ClInclude Include="Instance.h" />
     <ClInclude Include="LogicalDevice.h" />
     <ClInclude Include="PhysicalDevice.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="VulkanUtils.h" />
     <ClInclude Include="Window.h" />

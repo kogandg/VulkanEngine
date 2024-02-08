@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 #include <iostream>
+#include <array>
 
 static inline const char* VkSampleCountFlagBitsStr(VkSampleCountFlagBits samples) 
 {
@@ -77,4 +78,48 @@ static inline const char* VkColorSpaceKHRStr(VkColorSpaceKHR space)
         std::cout << "Vulkan Utils Warning: " << "VkColorSpaceKHRStr reach unspecified condition with " << space << std::endl;
         return "Unspecified";
     }
+}
+
+static inline const char* VkPolygonModeStr(VkPolygonMode mode) 
+{
+    switch (mode) 
+    {
+    case VK_POLYGON_MODE_FILL:
+        return "VK_POLYGON_MODE_FILL";
+    case VK_POLYGON_MODE_LINE:
+        return "VK_POLYGON_MODE_LINE";
+    case VK_POLYGON_MODE_POINT:
+        return "VK_POLYGON_MODE_POINT";
+    default:
+        std::cout << "Vulkan Utils Warning: " << "VkPolygonMode reach unspecified condition with " << mode << std::endl;
+        return "Unspecified";
+    }
+}
+
+constexpr std::array<VkPolygonMode, 3> VkPolygonModes() 
+{
+    return { VK_POLYGON_MODE_FILL, VK_POLYGON_MODE_LINE, VK_POLYGON_MODE_POINT };
+}
+
+static inline const char* VkCullModeStr(VkCullModeFlags mode) 
+{
+    switch (mode) 
+    {
+    case VK_CULL_MODE_NONE:
+        return "VK_CULL_MODE_NONE";
+    case VK_CULL_MODE_BACK_BIT:
+        return "VK_CULL_MODE_BACK_BIT";
+    case VK_CULL_MODE_FRONT_BIT:
+        return "VK_CULL_MODE_FRONT_BIT";
+    case VK_CULL_MODE_FRONT_AND_BACK:
+        return "VK_CULL_MODE_FRONT_AND_BACK";
+    default:
+        std::cout << "Vulkan Utils Warning: " << "VkCullMode reach unspecified condition with " << mode << std::endl;
+        return "Unspecified";
+    }
+}
+
+constexpr std::array<VkCullModeFlagBits, 4> VkCullModes() 
+{
+    return { VK_CULL_MODE_NONE, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_FRONT_AND_BACK };
 }
