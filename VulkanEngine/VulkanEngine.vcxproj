@@ -143,11 +143,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Buffers.cpp" />
+    <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FileManager.cpp" />
-    <ClCompile Include="GraphicsPipeline.cpp" />
-    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="GraphicsPipelineManager.cpp" />
+    <ClCompile Include="ImageManager.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -160,35 +161,29 @@
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="LogicalDevice.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="PhysicalDevice.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SwapChain.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="UnlitGraphicsPipeline.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\Converse.mtl" />
+    <None Include="assets\Default.scene" />
     <None Include="compile.bat" />
     <None Include="shader.frag" />
     <None Include="shader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="texture.jpg" />
-    <Image Include="viking_room.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="viking_room.obj">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Buffers.h" />
+    <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="BufferManager.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FileManager.h" />
-    <ClInclude Include="GraphicsPipeline.h" />
-    <ClInclude Include="Image.h" />
+    <ClInclude Include="GraphicsPipelineManager.h" />
+    <ClInclude Include="ImageManager.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
@@ -201,11 +196,37 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="LogicalDevice.h" />
+    <ClInclude Include="MeshManager.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="PhysicalDevice.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SwapChain.h" />
+    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="Transform.h" />
+    <ClInclude Include="UnlitGraphicsPipeline.h" />
     <ClInclude Include="VulkanUtils.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\checker.png" />
+    <Image Include="assets\Converse.jpg" />
+    <Image Include="assets\texture.jpg" />
+    <Image Include="assets\viking_room.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="assets\Converse.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Object>
+    <Object Include="assets\viking_room.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Object>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

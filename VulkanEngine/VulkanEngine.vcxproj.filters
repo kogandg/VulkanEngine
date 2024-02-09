@@ -16,14 +16,11 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{ac0c201b-454e-41f8-bf7c-79ee3c78d049}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Textures">
-      <UniqueIdentifier>{02bbbb72-b12f-4efe-8bdd-ed76902a446b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Models">
-      <UniqueIdentifier>{a1bfd2fd-4d10-46ae-ad3e-7d88cb77dd62}</UniqueIdentifier>
-    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{af93f0c4-e1cc-4d5e-bca8-7296ca0e8ae0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{f867d529-d1b5-4a79-80ee-4471c087b06e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,9 +40,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SwapChain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
@@ -84,10 +78,28 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsPipeline.cpp">
+    <ClCompile Include="GraphicsPipelineManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Buffers.cpp">
+    <ClCompile Include="BufferManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnlitGraphicsPipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,19 +113,12 @@
     <None Include="shader.vert">
       <Filter>Shaders</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="texture.jpg">
-      <Filter>Textures</Filter>
-    </Image>
-    <Image Include="viking_room.png">
-      <Filter>Textures</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="viking_room.obj">
-      <Filter>Models</Filter>
-    </Resource>
+    <None Include="assets\Converse.mtl">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\Default.scene">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Instance.h">
@@ -129,9 +134,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SwapChain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
@@ -176,11 +178,57 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsPipeline.h">
+    <ClInclude Include="GraphicsPipelineManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Buffers.h">
+    <ClInclude Include="BufferManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnlitGraphicsPipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\checker.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\Converse.jpg">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\texture.jpg">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\viking_room.png">
+      <Filter>assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="assets\Converse.obj">
+      <Filter>assets</Filter>
+    </Object>
+    <Object Include="assets\viking_room.obj">
+      <Filter>assets</Filter>
+    </Object>
   </ItemGroup>
 </Project>

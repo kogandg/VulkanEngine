@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "Image.h"
+#include "ImageManager.h"
 #include "LogicalDevice.h"
 #include "PhysicalDevice.h"
 #include "Window.h"
@@ -51,8 +51,8 @@ private:
     static inline VkFormat depthFormat;
     static inline VkExtent2D extent;
     static inline uint32_t currentFrame;
-    static inline int newAdditionalImages = 1;
-    static inline int newFramesInFlight= 3;
+    static inline int newAdditionalImages = 0;
+    static inline int newFramesInFlight= 2;
     static inline bool dirty = true;
             
     // preferred, warn if not available
