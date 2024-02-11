@@ -7,11 +7,13 @@
 #include "TextureManager.h"
 #include "Transform.h"
 
-struct ModelUBO {
+struct ModelUBO 
+{
     glm::mat4 model = glm::mat4(1.0f);
 };
 
-struct Model {
+struct Model
+{
     std::string name;
     Transform transform;
     MeshResource* mesh = nullptr;

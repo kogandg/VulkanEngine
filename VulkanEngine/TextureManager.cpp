@@ -1,20 +1,58 @@
 #include "TextureManager.h"
 
+#include "AssetManager.h"
+
 void TextureManager::Create()
 {
-
+    TextureResource* newTexture = AssetManager::LoadImageFile(defaultTexture->path);
+    defaultTexture->image = newTexture->image;
+    defaultTexture->sampler = newTexture->sampler;
+    if (textures[textures.size() - 1] != newTexture)
+    {
+        throw std::runtime_error("New texture is different than last texture on buffer!");
+    }
+    
+    textures.pop_back();
+    for (TextureResource* texture : textures) 
+    {
+        newTexture = AssetManager::LoadImageFile(texture->path);
+        texture->image = newTexture->image;
+        texture->sampler = newTexture->sampler;
+        if (textures[textures.size() - 1] != newTexture)
+        {
+            throw std::runtime_error("New texture is different than last texture on buffer!");
+        }
+        textures.pop_back();
+    }
 }
 
-void TextureManager::Destroy()
+void TextureManager::Setup() 
+{
+    defaultTexture = new TextureResource();
+    defaultTexture->path = "assets/checker.png";
+}
+
+void TextureManager::Finish()
 {
     for (TextureResource* texture : textures) 
     {
-        ImageManager::Destroy(texture->image);
-        vkDestroySampler(LogicalDevice::GetVkDevice(), texture->sampler, Instance::GetAllocator());
         delete texture;
     }
     textures.clear();
 }
+
+void TextureManager::Destroy()
+{
+    ImageManager::Destroy(defaultTexture->image);
+    vkDestroySampler(LogicalDevice::GetVkDevice(), defaultTexture->sampler, Instance::GetAllocator());
+
+    for (TextureResource* texture : textures) 
+    {
+        ImageManager::Destroy(texture->image);
+        vkDestroySampler(LogicalDevice::GetVkDevice(), texture->sampler, Instance::GetAllocator());
+    }
+}
+
 
 TextureResource* TextureManager::CreateTexture(TextureDescriptor& desc)
 {

@@ -10,27 +10,22 @@
 
 void SceneManager::Setup() 
 {
-
-}
-
-void SceneManager::Create() 
-{
-    RecreateDescriptors();
     std::vector<Model*> newModels;
 
     newModels = AssetManager::LoadObjFile("assets/viking_room.obj");
-    SceneManager::SetTexture(newModels[0], AssetManager::LoadImageFile("assets/viking_room.png"));
+    //SceneManager::SetTexture(newModels[0], AssetManager::LoadImageFile("assets/viking_room.png"));
     SceneManager::AddModel(newModels[0]);
 
     newModels = AssetManager::LoadObjFile("assets/Converse.obj");
-    SceneManager::SetTexture(newModels[0], AssetManager::LoadImageFile("assets/Converse.jpg"));
+    //SceneManager::SetTexture(newModels[0], AssetManager::LoadImageFile("assets/Converse.jpg"));
     SceneManager::AddModel(newModels[0]);
 
-    //newModels = AssetManager::LoadObjFile("assets/models/ignore/sponza_mini.obj");
-    /*for (Model* model : newModels) 
+    newModels = AssetManager::LoadObjFile("assets/sponza/sponza.obj");
+    for (Model* model : newModels) 
     {
+        model->ubo.model = glm::scale(glm::vec3(0.1));
         SceneManager::AddModel(model);
-    }*/
+    }
 
 }
 
@@ -104,15 +99,8 @@ void CreateModelDescriptors(Model* model)
     }
 }
 
-void SceneManager::RecreateDescriptors() 
+void SceneManager::Create()
 {
-    for (size_t i = 0; i < sceneBuffers.size(); i++) 
-    {
-        BufferManager::Destroy(sceneBuffers[i]);
-    }
-    sceneBuffers.clear();
-    sceneDescriptors.clear();
-
     auto numFrames = SwapChain::GetNumFrames();
     auto device = LogicalDevice::GetVkDevice();
     auto allocator = Instance::GetAllocator();
@@ -168,17 +156,39 @@ void SceneManager::RecreateDescriptors()
 
     for (Model* model : models) 
     {
+        CreateModelDescriptors(model);
+        if (model->texture) 
+        {
+            SceneManager::SetTexture(model, model->texture);
+        }
+    }
+}
+
+void SceneManager::Destroy()
+{
+    for (size_t i = 0; i < sceneBuffers.size(); i++) 
+    {
+        BufferManager::Destroy(sceneBuffers[i]);
+    }
+    sceneBuffers.clear();
+    sceneDescriptors.clear();
+
+    for (Model* model : models) 
+    {
         for (BufferResource& buffer : model->buffers) 
         {
             BufferManager::Destroy(buffer);
         }
         model->buffers.clear();
         model->descriptors.clear();
-        CreateModelDescriptors(model);
-        if (model->texture) 
-        {
-            SceneManager::SetTexture(model, model->texture);
-        }
+    }
+}
+
+void SceneManager::Finish()
+{
+    for (Model* model : models) 
+    {
+        delete model;
     }
 }
 
@@ -205,34 +215,6 @@ void SceneManager::SetTexture(Model* model, TextureResource* texture)
     }
 
     model->texture = texture;
-}
-
-void SceneManager::Save() 
-{
-}
-
-void SceneManager::Destroy() 
-{
-    for (size_t i = 0; i < sceneBuffers.size(); i++) 
-    {
-        BufferManager::Destroy(sceneBuffers[i]);
-    }
-    sceneBuffers.clear();
-    sceneDescriptors.clear();
-    for (Model* model : models) 
-    {
-        for (BufferResource& buffer : model->buffers) 
-        {
-            BufferManager::Destroy(buffer);
-        }
-        model->buffers.clear();
-        model->descriptors.clear();
-    }
-    for (auto& model : models) 
-    {
-        delete model;
-    }
-    models.clear();
 }
 
 Model* SceneManager::CreateModel() 

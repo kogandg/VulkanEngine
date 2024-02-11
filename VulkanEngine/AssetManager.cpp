@@ -46,7 +46,7 @@ std::vector<Model*> AssetManager::LoadObjFile(std::filesystem::path path)
         std::cerr << warn << err << std::endl;
         std::cerr << "Failed to load obj file " << path.string().c_str() << std::endl;
     }
-    TextureResource* checkerTexture = AssetManager::LoadImageFile("assets/checker.png");
+    TextureResource* defaultTexture = TextureManager::GetDefaultTexture();
     std::vector<TextureResource*> diffuseTextures(materials.size());
     for (size_t i = 0; i < materials.size(); i++) 
     {
@@ -65,7 +65,7 @@ std::vector<Model*> AssetManager::LoadObjFile(std::filesystem::path path)
 
     for (int i = 0; i < shapes.size(); i++) 
     {
-        MeshDescriptor desc;
+        MeshDescriptor* desc = new MeshDescriptor;
         std::unordered_map<MeshVertex, uint32_t> uniqueVertices{};
         size_t j = 0;
         size_t lastMaterialId = shapes[i].mesh.material_ids[0];
@@ -86,13 +86,15 @@ std::vector<Model*> AssetManager::LoadObjFile(std::filesystem::path path)
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
+            vertex.color = { 1, 1, 1 };
+
             if (uniqueVertices.count(vertex) == 0) 
             {
-                uniqueVertices[vertex] = (uint32_t)(desc.vertices.size());
-                desc.vertices.push_back(vertex);
+                uniqueVertices[vertex] = (uint32_t)(desc->vertices.size());
+                desc->vertices.push_back(vertex);
             }
 
-            desc.indices.push_back(uniqueVertices[vertex]);
+            desc->indices.push_back(uniqueVertices[vertex]);
             j += 1;
 
             if (j % 3 == 0) 
@@ -109,7 +111,7 @@ std::vector<Model*> AssetManager::LoadObjFile(std::filesystem::path path)
                     }
                     else 
                     {
-                        SceneManager::SetTexture(model, checkerTexture);
+                        SceneManager::SetTexture(model, defaultTexture);
                     }
                     models.push_back(model);
                     if (faceId < shapes[i].mesh.material_ids.size()) 
@@ -117,16 +119,16 @@ std::vector<Model*> AssetManager::LoadObjFile(std::filesystem::path path)
                         lastMaterialId = shapes[i].mesh.material_ids[faceId];
                     }
                     uniqueVertices.clear();
-                    desc.indices.clear();
-                    desc.vertices.clear();
+                    desc = new MeshDescriptor;
                 }
             }
         }
 
-        /*if (desc.vertices.size() == 0)
+        if (desc->vertices.size() != 0)
         {
             throw std::runtime_error("Reach shapes iteration ending without creating Model.");
-        }*/
+        }
+        delete desc;
     }
 
     return models;
@@ -148,6 +150,7 @@ TextureResource* AssetManager::LoadImageFile(std::filesystem::path path)
     desc.height = texHeight;
 
     TextureResource* texture = TextureManager::CreateTexture(desc);
+    texture->path = path;
 
     stbi_image_free(pixels);
 

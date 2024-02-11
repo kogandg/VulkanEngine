@@ -10,7 +10,8 @@
 #include "BufferManager.h"
 
 
-struct MeshVertex {
+struct MeshVertex 
+{
     glm::vec3 pos;
     glm::vec3 color;
     glm::vec2 texCoord;
@@ -87,8 +88,12 @@ class MeshManager
 public:
     static void Create();
     static void Destroy();
-    static MeshResource* CreateMesh(MeshDescriptor& desc);
+    static void Finish();
+    static MeshResource* CreateMesh(MeshDescriptor* desc);
 
 private:
+    static inline std::vector<MeshDescriptor*> descs;
     static inline std::vector<MeshResource*> meshes;
+
+    static void SetupMesh(MeshDescriptor* desc, MeshResource* resource);
 };

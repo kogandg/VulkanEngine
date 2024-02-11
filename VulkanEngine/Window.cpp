@@ -5,16 +5,41 @@ void Window::Create()
 	glfwInit();
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    monitors = glfwGetMonitors(&monitorCount);
 
+    glfwGetVideoModes(monitors[monitorIndex], &videoModeIndex);
+    videoModeIndex -= 1;
+
+    window = glfwCreateWindow(width, height, name, nullptr, nullptr);
+    glfwSetWindowPos(window, posX, posY);
+
+    glfwSetFramebufferSizeCallback(window, Window::framebufferResizeCallback);
+    glfwSetScrollCallback(window, Window::scrollCallback);
+    glfwSetWindowMaximizeCallback(window, Window::windowMaximizeCallback);
+    glfwSetWindowPosCallback(window, Window::windowChangePosCallback);
+
+    dirty = false;
+    Window::ApplyChanges();
+}
+
+void Window::ApplyChanges()
+{
 	monitors = glfwGetMonitors(&monitorCount);
 	auto monitor = monitors[monitorIndex];
 	auto monitorMode = glfwGetVideoMode(monitor);
 
+    int modesCount;
+    const GLFWvidmode* videoModes = glfwGetVideoModes(monitors[monitorIndex], &modesCount);
+    if (videoModeIndex >= modesCount)
+    {
+        videoModeIndex = modesCount - 1;
+    }
+
 	switch (mode)
 	{
 	case Window::Mode::Windowed:
-		window = glfwCreateWindow(width, height, name, nullptr, nullptr);
-		glfwSetWindowPos(window, 100, 100);
+        posY = std::max(posY, 101);
+        glfwSetWindowMonitor(window, nullptr, posX, posY, width, height, GLFW_DONT_CARE);
 
 		if (maximized)
 		{
@@ -32,17 +57,14 @@ void Window::Create()
 		glfwWindowHint(GLFW_BLUE_BITS, monitorMode->blueBits);
 		glfwWindowHint(GLFW_REFRESH_RATE, monitorMode->refreshRate);
 
-		window = glfwCreateWindow(monitorMode->width, monitorMode->height, name, monitor, nullptr);
+        glfwSetWindowMonitor(window, monitor, 0, 0, monitorMode->width, monitorMode->height, monitorMode->refreshRate);
 		break;
 
 	case Window::Mode::FullScreen:
-		window = glfwCreateWindow(width, height, name, monitor, nullptr);
+        GLFWvidmode videoMode = videoModes[videoModeIndex];
+        glfwSetWindowMonitor(window, monitor, 0, 0, videoMode.width, videoMode.height, videoMode.refreshRate);
 		break;
 	}
-
-	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-	glfwSetScrollCallback(window, scrollCallback);
-	glfwSetWindowMaximizeCallback(window, windowMaximizeCallback);
 
 	framebufferResized = false;
 	dirty = false;
@@ -78,6 +100,12 @@ void Window::UpdateFramebufferSize()
 	glfwGetFramebufferSize(window, &width, &height);
 }
 
+
+std::string VideoModeText(GLFWvidmode mode) 
+{
+    return std::to_string(mode.width) + "x" + std::to_string(mode.height) + " " + std::to_string(mode.refreshRate) + " Hz";
+}
+
 void Window::OnImgui()
 {
     const auto totalSpace = ImGui::GetContentRegionAvail();
@@ -94,13 +122,16 @@ void Window::OnImgui()
             ImGui::PushID("modeCombo");
             if (ImGui::BeginCombo("", modeNames[(int)mode])) 
             {
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++) 
+                {
                     bool selected = (int)mode == i;
                     if (ImGui::Selectable(modeNames[i], selected)) 
                     {
                         mode = (Window::Mode)i;
+                        dirty = true;
                     }
-                    if (selected) {
+                    if (selected) 
+                    {
                         ImGui::SetItemDefaultFocus();
                     }
                 }
@@ -118,14 +149,17 @@ void Window::OnImgui()
                 ImGui::PushID("monitorCombo");
                 if (ImGui::BeginCombo("", glfwGetMonitorName(monitors[monitorIndex]))) 
                 {
-                    for (int i = 0; i < monitorCount; i++) {
+                    for (int i = 0; i < monitorCount; i++) 
+                    {
                         bool selected = monitorIndex == i;
                         ImGui::PushID(i);
                         if (ImGui::Selectable(glfwGetMonitorName(monitors[i]), selected)) 
                         {
                             monitorIndex = i;
+                            dirty = true;
                         }
-                        if (selected) {
+                        if (selected) 
+                        {
                             ImGui::SetItemDefaultFocus();
                         }
                         ImGui::PopID();
@@ -137,18 +171,38 @@ void Window::OnImgui()
         }
         // resolution
         {
-            if (mode == Mode::FullScreen || (mode == Mode::Windowed && maximized == false)) 
+            if (mode == Mode::FullScreen) 
             {
                 ImGui::Text("Resolution");
                 ImGui::SameLine(totalWidth / 2.0f);
                 ImGui::SetNextItemWidth(totalWidth / 4.0f);
-                ImGui::PushID("width");
-                ImGui::InputInt("", &width, 1);
-                ImGui::PopID();
-                ImGui::SameLine(3 * totalWidth / 4.0f);
-                ImGui::SetNextItemWidth(totalWidth / 4.0f);
-                ImGui::PushID("height");
-                ImGui::InputInt("", &height, 1);
+                ImGui::PushID("monitorRes");
+                int modesCount;
+                const GLFWvidmode* videoModes = glfwGetVideoModes(monitors[monitorIndex], &modesCount);
+                GLFWvidmode currMode = videoModes[videoModeIndex];
+                std::string modeText = VideoModeText(currMode);
+
+                if (ImGui::BeginCombo("", modeText.c_str())) 
+                {
+                    for (int i = 0; i < modesCount; i++) 
+                    {
+                        bool selected = videoModeIndex == i;
+                        currMode = videoModes[i];
+                        ImGui::PushID(i);
+                        modeText = VideoModeText(currMode);
+                        if (ImGui::Selectable(modeText.c_str(), selected)) 
+                        {
+                            videoModeIndex = i;
+                            dirty = true;
+                        }
+                        if (selected) 
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::PopID();
+                    }
+                    ImGui::EndCombo();
+                }
                 ImGui::PopID();
             }
         }
@@ -162,7 +216,10 @@ void Window::OnImgui()
                     ImGui::SameLine(totalWidth / 2.0f);
                     ImGui::SetNextItemWidth(totalWidth / 2.0f);
                     ImGui::PushID("maximized");
-                    ImGui::Checkbox("", &maximized);
+                    if (ImGui::Checkbox("", &maximized)) 
+                    {
+                        dirty = true;
+                    }
                     ImGui::PopID();
                 }
                 // decorated
@@ -171,7 +228,10 @@ void Window::OnImgui()
                     ImGui::SameLine(totalWidth / 2.0f);
                     ImGui::SetNextItemWidth(totalWidth / 2.0f);
                     ImGui::PushID("decorated");
-                    ImGui::Checkbox("", &decorated);
+                    if (ImGui::Checkbox("", &decorated)) 
+                    {
+                        dirty = true;
+                    }
                     ImGui::PopID();
                 }
                 // resizable
@@ -180,13 +240,13 @@ void Window::OnImgui()
                     ImGui::SameLine(totalWidth / 2.0f);
                     ImGui::SetNextItemWidth(totalWidth / 2.0f);
                     ImGui::PushID("resizable");
-                    ImGui::Checkbox("", &resizable);
+                    if (ImGui::Checkbox("", &resizable)) 
+                    {
+                        dirty = true;
+                    }
                     ImGui::PopID();
                 }
             }
-        }
-        if (ImGui::Button("Recreate")) {
-            dirty = true;
         }
     }
 }
@@ -207,4 +267,10 @@ void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height
 void Window::windowMaximizeCallback(GLFWwindow* window, int maximize)
 {
 	Window::maximized = maximize;
+}
+
+void Window::windowChangePosCallback(GLFWwindow* window, int x, int y)
+{
+    Window::posX = x;
+    Window::posY = y;
 }

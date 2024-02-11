@@ -19,9 +19,6 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{af93f0c4-e1cc-4d5e-bca8-7296ca0e8ae0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="assets">
-      <UniqueIdentifier>{f867d529-d1b5-4a79-80ee-4471c087b06e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -113,12 +110,6 @@
     <None Include="shader.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="assets\Converse.mtl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\Default.scene">
-      <Filter>assets</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Instance.h">
@@ -208,27 +199,5 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\checker.png">
-      <Filter>assets</Filter>
-    </Image>
-    <Image Include="assets\Converse.jpg">
-      <Filter>assets</Filter>
-    </Image>
-    <Image Include="assets\texture.jpg">
-      <Filter>assets</Filter>
-    </Image>
-    <Image Include="assets\viking_room.png">
-      <Filter>assets</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="assets\Converse.obj">
-      <Filter>assets</Filter>
-    </Object>
-    <Object Include="assets\viking_room.obj">
-      <Filter>assets</Filter>
-    </Object>
   </ItemGroup>
 </Project>

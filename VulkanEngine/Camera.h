@@ -20,12 +20,14 @@ public:
     const glm::mat4& GetProj();// { return proj; }
 
 private:
-    enum class Control {
+    enum class Control 
+    {
         Orbit,
         Fly
     };
 
-    enum class Type {
+    enum class Type 
+    {
         Perspective,
         Orthographic
     };

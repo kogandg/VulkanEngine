@@ -242,15 +242,15 @@ void ImageManager::Destroy(ImageResource& resource)
     auto device = LogicalDevice::GetVkDevice();
     auto allocator = Instance::GetAllocator();
 
-    if (resource.image != VK_NULL_HANDLE)
+    if (resource.image == VK_NULL_HANDLE)
     {
         throw std::runtime_error("Null image at ImageManager::Destroy");
     }
-    if (resource.view != VK_NULL_HANDLE)
+    if (resource.view == VK_NULL_HANDLE)
     {
         throw std::runtime_error("Null view at ImageManager::Destroy");
     }
-    if (resource.memory != VK_NULL_HANDLE)
+    if (resource.memory == VK_NULL_HANDLE)
     {
         throw std::runtime_error("Null memory at ImageManager::Destroy");
     }

@@ -15,6 +15,7 @@ public:
     static void UpdateFramebufferSize();
 
     static void OnImgui();
+    static void ApplyChanges();
 
     static inline GLFWwindow* GetGLFWwindow() { return window; }
     static inline bool IsDirty() { return dirty; }
@@ -40,6 +41,7 @@ private:
     static inline int monitorIndex = 0;
     static inline int monitorCount = 0;
     static inline bool framebufferResized = false;
+    static inline int videoModeIndex = 0;
 
     static inline std::chrono::high_resolution_clock::time_point lastTime;
     static inline float deltaTime = 0.0f;
@@ -65,5 +67,6 @@ private:
     static void scrollCallback(GLFWwindow* window, double x, double y);
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
     static void windowMaximizeCallback(GLFWwindow* window, int maximize);
+    static void windowChangePosCallback(GLFWwindow* window, int x, int y);
 };
 
